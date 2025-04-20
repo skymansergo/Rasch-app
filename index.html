@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Расчет</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="data:,">
+  <meta name="google" content="notranslate">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      width: 100%;
+      max-width: 400px;
+      background-color: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .header h1 {
+      font-size: 18px;
+      margin: 0;
+    }
+    .header span {
+      font-size: 14px;
+      color: #888;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .input-group input {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+      color: #888;
+      text-align: center;
+    }
+    .results {
+      margin-bottom: 20px;
+    }
+    .result-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .result-item img {
+      width: 20px;
+      height: 20px;
+    }
+    .result-item span {
+      font-size: 14px;
+    }
+    .button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      width: 100%;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .offline-message {
+      color: red;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="offlineMessage" class="offline-message" style="display: none;">
+    Вы находитесь в оффлайн-режиме.
+  </div>
+  <div class="container" id="capture">
+    <div class="header">
+      <h1>Расчет</h1>
+      <span id="currentDate">19.04.25</span>
+    </div>
+    <div class="input-group">
+      <input type="number" placeholder="Начальный пробег (км)" id="startMileage">
+      <input type="number" placeholder="Начальное топливо во (л)" id="startFuel">
+      <input type="number" placeholder="Конечный пробег (км)" id="endMileage">
+      <input type="number" placeholder="Норма расхода (л/100км)" id="fuelRate">
+      <input type="number" placeholder="Заправлено (л)" id="refueled">
+    </div>
+    <div class="results">
+      <h3>Результаты</h3>
+      <div class="result-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" fill="#FF0000"/>
+        </svg>
+        <span>Дневной пробег, км: <span id="dailyMileage">0</span></span>
+      </div>
+      <div class="result-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 6H16V5C16 3.34 14.66 2 13 2H11C9.34 2 8 3.34 8 5V6H4C2.9 6 2 6.9 2 8V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V8C22 6.9 21.1 6 20 6ZM10 5C10 4.45 10.45 4 11 4H13C13.55 4 14 4.45 14 5V6H10V5ZM14 15H12V13H10V15H8V17H10V19H12V17H14V15Z" fill="#FFA500"/>
+        </svg>
+        <span>Расход топлива, л: <span id="fuelConsumption">0</span></span>
+      </div>
+      <div class="result-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 18C9.24 18 7 15.76 7 13C7 11.67 7.67 10.5 8.71 9.71L15.29 16.29C14.5 17.33 13.33 18 12 18ZM15.29 9.71C16.33 10.5 17 11.67 17 13C17 15.76 14.76 18 12 18C10.67 18 9.5 17.33 8.71 16.29L15.29 9.71Z" fill="#0000FF"/>
+        </svg>
+        <span>Остаток топлива, л: <span id="fuelRemaining">0</span></span>
+      </div>
+    </div>
+    <button id="downloadButton" class="button">
+      <span>Скачать отчет</span>
+    </button>
+  </div>
+
+  <script>
+    console.log('JavaScript начал выполняться');
+
+    // Элементы
+    const offlineMessage = document.getElementById('offlineMessage');
+    const startMileage = document.getElementById('startMileage');
+    const startFuel = document.getElementById('startFuel');
+    const endMileage = document.getElementById('endMileage');
+    const fuelRate = document.getElementById('fuelRate');
+    const refueled = document.getElementById('refueled');
+    const dailyMileage = document.getElementById('dailyMileage');
+    const fuelConsumption = document.getElementById('fuelConsumption');
+    const fuelRemaining = document.getElementById('fuelRemaining');
+    const currentDate = document.getElementById('currentDate');
+    const downloadButton = document.getElementById('downloadButton');
+
+    // Проверка статуса сети
+    console.log('Добавление обработчиков для проверки сети');
+    function updateOnlineStatus() {
+      console.log('Проверка статуса сети');
+      if (!navigator.onLine) {
+        offlineMessage.style.display = 'block';
+        console.log('Приложение запущено в оффлайн-режиме');
+      } else {
+        offlineMessage.style.display = 'none';
+        console.log('Приложение запущено в онлайн-режиме');
+      }
+    }
+
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus();
+
+    // Установка текущей даты
+    console.log('Установка текущей даты');
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' });
+    currentDate.textContent = formattedDate;
+
+    // Загрузка сохраненных данных
+    console.log('Определение функции loadSavedData');
+    function loadSavedData() {
+      console.log('Загрузка сохраненных данных');
+      startMileage.value = localStorage.getItem('startMileage') || '';
+      startFuel.value = localStorage.getItem('startFuel') || '';
+      endMileage.value = localStorage.getItem('endMileage') || '';
+      fuelRate.value = localStorage.getItem('fuelRate') || '';
+      refueled.value = localStorage.getItem('refueled') || '';
+      console.log('Данные загружены:', {
+        startMileage: startMileage.value,
+        startFuel: startFuel.value,
+        endMileage: endMileage.value,
+        fuelRate: fuelRate.value,
+        refueled: refueled.value
+      });
+      calculate();
+    }
+
+    // Сохранение данных
+    console.log('Определение функции saveData');
+    function saveData() {
+      console.log('Сохранение данных');
+      localStorage.setItem('startMileage', startMileage.value);
+      localStorage.setItem('startFuel', startFuel.value);
+      localStorage.setItem('endMileage', endMileage.value);
+      localStorage.setItem('fuelRate', fuelRate.value);
+      localStorage.setItem('refueled', refueled.value);
+      console.log('Данные сохранены:', {
+        startMileage: startMileage.value,
+        startFuel: startFuel.value,
+        endMileage: endMileage.value,
+        fuelRate: fuelRate.value,
+        refueled: refueled.value
+      });
+    }
+
+    // Расчет
+    console.log('Определение функции calculate');
+    function calculate() {
+      console.log('Выполняется расчет');
+      const startM = parseFloat(startMileage.value) || 0;
+      const endM = parseFloat(endMileage.value) || 0;
+      const startF = parseFloat(startFuel.value) || 0;
+      const rate = parseFloat(fuelRate.value) || 0;
+      const refuel = parseFloat(refueled.value) || 0;
+
+      const dailyM = endM - startM;
+      dailyMileage.textContent = Math.ceil(dailyM);
+
+      let consumption = (dailyM / 100) * rate;
+      if (dailyM <= 1 && dailyM > 0) {
+        consumption = Math.max(1, consumption);
+      }
+      fuelConsumption.textContent = Math.ceil(consumption);
+
+      const remaining = startF + refuel - consumption;
+      fuelRemaining.textContent = Math.ceil(remaining);
+
+      console.log('Результаты расчета:', {
+        dailyMileage: dailyMileage.textContent,
+        fuelConsumption: fuelConsumption.textContent,
+        fuelRemaining: fuelRemaining.textContent
+      });
+
+      saveData();
+    }
+
+    // Скачивание отчета
+    console.log('Определение функции downloadReport');
+    function downloadReport() {
+      console.log('Попытка скачать отчет');
+      const reportText = `
+Расчет (${currentDate.textContent})
+Начальный пробег: ${startMileage.value || 0} км
+Начальное топливо: ${startFuel.value || 0} л
+Конечный пробег: ${endMileage.value || 0} км
+Норма расхода: ${fuelRate.value || 0} л/100км
+Заправлено: ${refueled.value || 0} л
+
+Результаты:
+Дневной пробег: ${dailyMileage.textContent} км
+Расход топлива: ${fuelConsumption.textContent} л
+Остаток топлива: ${fuelRemaining.textContent} л
+      `.trim();
+
+      const link = document.createElement('a');
+      link.download = `Расчет_${currentDate.textContent}.txt`;
+      link.href = 'data:text/plain;charset=utf-8,%EF%BB%BF' + encodeURIComponent(reportText);
+      link.click();
+      console.log('Отчет успешно сгенерирован и скачан');
+
+      localStorage.clear();
+      startMileage.value = '';
+      startFuel.value = '';
+      endMileage.value = '';
+      fuelRate.value = '';
+      refueled.value = '';
+      calculate();
+    }
+
+    // Регистрация обработчиков
+    console.log('Определение функции enableInputs');
+    function enableInputs() {
+      console.log('Включение обработчиков ввода');
+      const inputs = [startMileage, startFuel, endMileage, fuelRate, refueled];
+      inputs.forEach(input => {
+        input.addEventListener('input', () => {
+          console.log('Ввод данных в поле:', input.id, 'значение:', input.value);
+          calculate();
+        });
+      });
+
+      downloadButton.addEventListener('click', () => {
+        console.log('Нажата кнопка "Скачать отчет"');
+        downloadReport();
+      });
+
+      console.log('Все обработчики успешно зарегистрированы');
+    }
+
+    // Инициализация
+    console.log('Определение функции init');
+    function init() {
+      console.log('Инициализация приложения');
+      loadSavedData();
+      enableInputs();
+      console.log('Приложение полностью загружено');
+    }
+
+    // Старт
+    console.log('Запуск инициализации');
+    setTimeout(() => {
+      init();
+    }, 3000);
+
+    // Регистрация Service Worker
+    console.log('Проверка поддержки Service Worker');
+    if ('serviceWorker' in navigator) {
+      console.log('Попытка зарегистрировать Service Worker с /sw.js');
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          console.log('Service Worker успешно зарегистрирован:', registration);
+          caches.keys().then(cacheNames => {
+            if (cacheNames.length === 0) {
+              console.warn('Кэш пуст, требуется онлайн-подключение для первого запуска');
+            } else {
+              console.log('Кэш найден:', cacheNames);
+              caches.open('v10').then(cache => {
+                cache.keys().then(requests => {
+                  console.log('Кэшированные ресурсы:', requests.map(req => req.url));
+                });
+              });
+            }
+          });
+        })
+        .catch(err => {
+          console.error('Ошибка регистрации Service Worker:', err);
+        });
+    } else {
+      console.warn('Service Worker не поддерживается в этом браузере');
+    }
+  </script>
+</body>
+</html>
