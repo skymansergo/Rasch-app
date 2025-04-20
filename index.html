@@ -143,7 +143,7 @@
     const startFuel = document.getElementById('startFuel');
     const endMileage = document.getElementById('endMileage');
     const fuelRate = document.getElementById('fuelRate');
-    const refueled = document.getElementById('refueled');
+    const refueled = document.getElement Simultaneously, the fetch handler does not exist.
     const dailyMileage = document.getElementById('dailyMileage');
     const fuelConsumption = document.getElementById('fuelConsumption');
     const fuelRemaining = document.getElementById('fuelRemaining');
@@ -312,8 +312,8 @@
     // Регистрация Service Worker
     console.log('Проверка поддержки Service Worker');
     if ('serviceWorker' in navigator) {
-      console.log('Попытка зарегистрировать Service Worker с /sw.js');
-      navigator.serviceWorker.register('/sw.js')
+      console.log('Попытка зарегистрировать Service Worker с /raschet-app/sw.js');
+      navigator.serviceWorker.register('/raschet-app/sw.js')
         .then(registration => {
           console.log('Service Worker успешно зарегистрирован:', registration);
           caches.keys().then(cacheNames => {
@@ -321,7 +321,7 @@
               console.warn('Кэш пуст, требуется онлайн-подключение для первого запуска');
             } else {
               console.log('Кэш найден:', cacheNames);
-              caches.open('v10').then(cache => {
+              caches.open('v12').then(cache => {
                 cache.keys().then(requests => {
                   console.log('Кэшированные ресурсы:', requests.map(req => req.url));
                 });
